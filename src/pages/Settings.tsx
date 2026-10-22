@@ -2,6 +2,7 @@ import { KeyRound, LogOut, Save } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { centsToInput, parseMoney, SERVICE_LABELS, SERVICE_TYPES, type Settings, type User } from "@shared/domain";
 import { api, logout, useAction, useSettings } from "../api";
+import { InstallCard } from "../components/InstallCard";
 import { Button, Card, Field, Input } from "../components/ui";
 
 export function SettingsPage({ user }: { user: User }) {
@@ -30,6 +31,7 @@ export function SettingsPage({ user }: { user: User }) {
     <Input id={id} value={company[key]} onChange={e => setCompany({ ...company, [key]: e.target.value })} />;
 
   return <div className="mx-auto max-w-2xl space-y-5">
+    <InstallCard />
     <form onSubmit={submit} className="space-y-5">
       <Card className="p-5">
         <h2 className="text-base font-extrabold">Tabela de valores</h2>

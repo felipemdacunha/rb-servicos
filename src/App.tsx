@@ -1,11 +1,12 @@
-import { CalendarDays, Loader2, Receipt, Settings as SettingsIcon } from "lucide-react";
+import { CalendarDays, Loader2, Receipt, Settings as SettingsIcon, WifiOff } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { today } from "@shared/domain";
-import { api, ApiError, useSession } from "./api";
+import { api, ApiError, useSession, useSettings } from "./api";
 import { Button, cx, Field, Input, Logo } from "./components/ui";
 import { AgendaPage } from "./pages/Agenda";
 import { ClosingPage } from "./pages/Closing";
+import { useOnline } from "./pwa";
 import { SettingsPage } from "./pages/Settings";
 
 type Tab = "agenda" | "fechamento" | "ajustes";
@@ -15,17 +16,33 @@ const TABS: Array<{ id: Tab; label: string; icon: typeof CalendarDays }> = [
   { id: "ajustes", label: "Ajustes", icon: SettingsIcon },
 ];
 
+/** Atalho do ícone (segurar o ícone do app → "Nova OS") abre o formulário direto. */
+function takeShortcut() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("acao") !== "nova-os") return false;
+  window.history.replaceState(null, "", "/");
+  return true;
+}
+
 export function App() {
   const session = useSession();
-  const [tab, setTab] = useState<Tab>("agenda");
+  const online = useOnline();
+  // Carrega os preços logo ao abrir: ficam guardados no celular para usar sem internet.
+  useSettings(Boolean(session.data?.user));
+  const [tab, setTabState] = useState<Tab>("agenda");
   const [month, setMonth] = useState(() => today().slice(0, 7));
+  const [openNew] = useState(takeShortcut);
+  const setTab = (next: Tab) => {
+    setTabState(next);
+    window.scrollTo({ top: 0 });
+  };
 
   if (session.isPending) return <div className="grid min-h-dvh place-items-center bg-night"><Loader2 className="h-6 w-6 animate-spin text-brand" /></div>;
   if (session.isError) return <div className="grid min-h-dvh place-items-center p-6 text-center"><div><p className="font-bold">Não foi possível conectar.</p><Button className="mt-4" onClick={() => void session.refetch()}>Tentar novamente</Button></div></div>;
   if (!session.data.user) return <LoginPage setup={session.data.needsSetup} />;
 
-  return <div className="min-h-dvh pb-24 sm:pb-10">
-    <header className="safe-top sticky top-0 z-30 bg-night text-white shadow-lg shadow-black/10">
+  return <div className="pb-nav min-h-dvh sm:pb-10">
+    <header className="safe-top safe-x sticky top-0 z-30 bg-night text-white shadow-lg shadow-black/10">
       <div className="mx-auto flex h-16 max-w-5xl items-center gap-4 px-4">
         <Logo className="h-12 w-auto" />
         <div className="leading-tight">
@@ -39,18 +56,21 @@ export function App() {
         </nav>
       </div>
       <div className="h-1 bg-brand" />
+      {!online && <div className="flex items-center justify-center gap-2 bg-wait-tint px-4 py-1.5 text-xs font-bold text-wait">
+        <WifiOff className="h-3.5 w-3.5" />Sem internet · mostrando os dados salvos no celular
+      </div>}
     </header>
 
-    <main className="mx-auto max-w-5xl px-4 py-5">
-      {tab === "agenda" && <AgendaPage month={month} setMonth={setMonth} />}
+    <main className="px-safe mx-auto max-w-5xl py-5">
+      {tab === "agenda" && <AgendaPage month={month} setMonth={setMonth} openNew={openNew} />}
       {tab === "fechamento" && <ClosingPage month={month} setMonth={setMonth} />}
       {tab === "ajustes" && <SettingsPage user={session.data.user} />}
     </main>
 
     {/* Celular: abas embaixo, ao alcance do polegar. */}
-    <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-night sm:hidden">
+    <nav className="safe-bottom safe-x fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-night sm:hidden">
       <div className="grid grid-cols-3">
-        {TABS.map(t => <button key={t.id} onClick={() => setTab(t.id)} className={cx("flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-bold", tab === t.id ? "text-white" : "text-white/50")}>
+        {TABS.map(t => <button key={t.id} onClick={() => setTab(t.id)} aria-current={tab === t.id ? "page" : undefined} className={cx("no-select flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-bold", tab === t.id ? "text-white" : "text-white/50")}>
           <span className={cx("grid h-8 w-12 place-items-center rounded-full", tab === t.id && "bg-brand")}><t.icon className="h-5 w-5" /></span>
           {t.label}
         </button>)}
@@ -80,7 +100,7 @@ function LoginPage({ setup }: { setup: boolean }) {
     }
   }
 
-  return <div className="flex min-h-dvh flex-col items-center justify-center bg-night px-5 py-10">
+  return <div className="safe-top safe-bottom flex min-h-dvh flex-col items-center justify-center bg-night px-5 py-10">
     <Logo className="w-64 max-w-[75vw]" />
     <form onSubmit={submit} className="reveal mt-8 w-full max-w-sm space-y-4 rounded-3xl bg-surface p-6 shadow-2xl">
       <div>

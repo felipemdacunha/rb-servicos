@@ -4,3 +4,4 @@ data
 .env
 scripts/node_modules
 scripts/package*.json
+.claude

@@ -5,6 +5,9 @@ import { Toaster } from "sonner";
 import { ApiError } from "./api";
 import { App } from "./App";
 import "./index.css";
+import { setupPwa } from "./pwa";
+
+setupPwa();
 
 const queryClient = new QueryClient({
   defaultOptions: {

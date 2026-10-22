@@ -65,6 +65,8 @@ if (isDev) {
     index: false,
     setHeaders: (res, path) => {
       if (/[\\/]assets[\\/]/.test(path)) res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      // O celular precisa sempre conferir se há versão nova destes.
+      else if (/[\\/](sw\.js|manifest\.webmanifest)$/.test(path)) res.setHeader("Cache-Control", "no-cache");
     },
   }));
   app.get(/^\/(assets|icons)\//, (_req, res) => res.status(404).type("text/plain").send("Arquivo não encontrado."));

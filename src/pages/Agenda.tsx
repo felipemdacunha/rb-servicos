@@ -2,16 +2,17 @@ import { Check, Clock, Loader2, MapPin, Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { formatDate, formatKm, formatMoney, formatPlate, normalizePlate, orderTotal, SERVICE_LABELS, summarize, today, weekday, type Order } from "@shared/domain";
 import { api, useAction, useOrders } from "../api";
+import { InstallCard } from "../components/InstallCard";
 import { OrderForm } from "../components/OrderForm";
 import { Button, Card, cx, MonthPicker, ServiceBadge, StatusBadge } from "../components/ui";
 
 type Filter = "todas" | "agendada" | "concluida";
 
-export function AgendaPage({ month, setMonth }: { month: string; setMonth: (m: string) => void }) {
+export function AgendaPage({ month, setMonth, openNew }: { month: string; setMonth: (m: string) => void; openNew?: boolean }) {
   const orders = useOrders(month);
   const [filter, setFilter] = useState<Filter>("todas");
   const [search, setSearch] = useState("");
-  const [editing, setEditing] = useState<Order | "new" | null>(null);
+  const [editing, setEditing] = useState<Order | "new" | null>(openNew ? "new" : null);
   const list = orders.data ?? [];
   const summary = summarize(list);
   const todayDate = today();
@@ -32,6 +33,7 @@ export function AgendaPage({ month, setMonth }: { month: string; setMonth: (m: s
   const complete = useAction((o: Order) => api("PUT", `/orders/${o.id}`, { ...o, status: "concluida" }), "Serviço concluído.");
 
   return <div className="space-y-5">
+    <InstallCard compact />
     <div className="flex flex-wrap items-center justify-between gap-3">
       <MonthPicker month={month} onChange={setMonth} />
       <div className="hidden sm:block"><Button icon={Plus} onClick={() => setEditing("new")}>Nova OS</Button></div>
@@ -52,7 +54,7 @@ export function AgendaPage({ month, setMonth }: { month: string; setMonth: (m: s
       </div>
       <label className="relative flex-1">
         <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted" />
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar placa, veículo, cidade…" className="h-11 w-full rounded-xl border border-line bg-surface pr-3 pl-9 text-sm focus:border-brand focus:outline-none" />
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar placa, veículo, cidade…" type="search" enterKeyHint="search" className="h-11 w-full appearance-none rounded-xl border border-line bg-surface pr-3 pl-9 text-base focus:border-brand focus:outline-none" />
       </label>
     </div>
 
@@ -75,7 +77,7 @@ export function AgendaPage({ month, setMonth }: { month: string; setMonth: (m: s
       </div>}
 
     {/* Botão flutuante no celular. */}
-    <button onClick={() => setEditing("new")} aria-label="Nova OS" className="fixed right-4 bottom-24 z-20 grid h-14 w-14 place-items-center rounded-2xl bg-brand text-white shadow-xl shadow-brand/30 sm:hidden">
+    <button onClick={() => setEditing("new")} aria-label="Nova OS" className="above-nav no-select fixed right-4 z-20 grid h-14 w-14 place-items-center rounded-2xl bg-brand text-white shadow-xl shadow-brand/30 sm:hidden">
       <Plus className="h-7 w-7" />
     </button>
 

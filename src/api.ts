@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { DEFAULT_SETTINGS, type Order, type Settings, type User } from "@shared/domain";
+import { clearOfflineData } from "./pwa";
 
 export class ApiError extends Error {
   constructor(message: string, readonly status: number) {
@@ -18,7 +19,7 @@ export async function api<T = unknown>(method: "GET" | "POST" | "PUT" | "DELETE"
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   } catch {
-    throw new ApiError("Sem conexão. Verifique a internet e tente de novo.", 0);
+    throw new ApiError("Sem internet. Para salvar, conecte-se e tente de novo.", 0);
   }
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new ApiError(data.error ?? "Não foi possível completar a operação.", response.status);
@@ -28,8 +29,8 @@ export async function api<T = unknown>(method: "GET" | "POST" | "PUT" | "DELETE"
 export const useSession = () =>
   useQuery({ queryKey: ["session"], queryFn: () => api<{ user: User | null; needsSetup: boolean }>("GET", "/auth/me"), staleTime: Infinity });
 
-export function useSettings(): Settings {
-  return useQuery({ queryKey: ["settings"], queryFn: () => api<Settings>("GET", "/settings"), staleTime: 60_000 }).data ?? DEFAULT_SETTINGS;
+export function useSettings(enabled = true): Settings {
+  return useQuery({ queryKey: ["settings"], queryFn: () => api<Settings>("GET", "/settings"), staleTime: 60_000, enabled }).data ?? DEFAULT_SETTINGS;
 }
 
 export const useOrders = (month: string) =>
@@ -56,5 +57,6 @@ export function useAction<TInput, TResult = unknown>(run: (input: TInput) => Pro
 
 export async function logout() {
   await api("POST", "/auth/logout", {}).catch(() => undefined);
+  clearOfflineData();
   window.location.replace("/");
 }

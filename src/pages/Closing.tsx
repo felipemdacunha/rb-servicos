@@ -86,7 +86,7 @@ export function ClosingPage({ month, setMonth }: { month: string; setMonth: (m: 
     </section>
 
     <div className="h-16 sm:hidden" />
-    <div className="safe-bottom fixed inset-x-0 bottom-16 z-20 px-4 pb-3 sm:hidden">
+    <div className="above-nav fixed inset-x-0 z-20 px-4 sm:hidden">
       <Button size="lg" className="w-full shadow-xl shadow-brand/30" icon={FileDown} loading={busy} disabled={!done.length} onClick={() => void generate()}>Gerar PDF do mês</Button>
     </div>
   </div>;

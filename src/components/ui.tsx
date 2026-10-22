@@ -28,7 +28,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<HTMLBut
     </button>;
   });
 
-const fieldBase = "w-full rounded-xl border border-line bg-surface px-3 text-[15px] text-ink placeholder:text-muted/70 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15";
+// 16px: abaixo disso o iPhone dá zoom na tela ao tocar no campo.
+const fieldBase = "w-full appearance-none rounded-xl border border-line bg-surface px-3 text-base text-ink placeholder:text-muted/70 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15";
 
 export function Field({ label, hint, children, className }: { label: string; hint?: ReactNode; children: (id: string) => ReactNode; className?: string }) {
   const id = useId();
@@ -62,12 +63,13 @@ export function Sheet({ title, onClose, children, footer }: { title: string; onC
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center sm:p-6" onMouseDown={e => e.target === e.currentTarget && onClose()}>
       <div role="dialog" aria-modal="true" aria-label={title} className="modal-panel flex max-h-[94dvh] w-full max-w-lg flex-col rounded-t-3xl bg-surface shadow-2xl sm:rounded-3xl">
-        <div className="flex items-center justify-between border-b border-line px-5 py-4">
+        <div className="mx-auto mt-2 h-1.5 w-10 rounded-full bg-line sm:hidden" aria-hidden />
+        <div className="flex items-center justify-between border-b border-line px-5 py-3 sm:py-4">
           <h2 className="text-lg font-extrabold">{title}</h2>
           <button onClick={onClose} aria-label="Fechar" className="grid h-9 w-9 place-items-center rounded-full text-muted hover:bg-canvas"><X className="h-5 w-5" /></button>
         </div>
-        <div className="flex-1 overflow-y-auto px-5 py-4">{children}</div>
-        {footer && <div className="safe-bottom border-t border-line px-5 py-3">{footer}</div>}
+        <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4">{children}</div>
+        {footer && <div className="border-t border-line px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">{footer}</div>}
       </div>
     </div>, document.body);
 }
