@@ -30,8 +30,8 @@ export function SettingsPage({ user }: { user: User }) {
   const companyField = (key: keyof Settings["company"]) => (id: string) =>
     <Input id={id} value={company[key]} onChange={e => setCompany({ ...company, [key]: e.target.value })} />;
 
-  return <div className="mx-auto max-w-2xl space-y-5">
-    <InstallCard />
+  // Computador: valores e dados do PDF à esquerda; instalação, senha e conta à direita.
+  return <div className="grid items-start gap-5 lg:grid-cols-[1fr_24rem] lg:gap-6 xl:grid-cols-[1fr_28rem]">
     <form onSubmit={submit} className="space-y-5">
       <Card className="p-5">
         <h2 className="text-base font-extrabold">Tabela de valores</h2>
@@ -58,12 +58,14 @@ export function SettingsPage({ user }: { user: User }) {
       <Button type="submit" icon={Save} loading={save.isPending} className="w-full sm:w-auto">Salvar ajustes</Button>
     </form>
 
-    <PasswordCard />
-
-    <Card className="flex items-center justify-between gap-3 p-5">
-      <div className="min-w-0"><p className="font-bold">{user.name}</p><p className="truncate text-sm text-muted">{user.email}</p></div>
-      <Button variant="outline" icon={LogOut} onClick={() => void logout()}>Sair</Button>
-    </Card>
+    <div className="space-y-5 lg:sticky lg:top-24">
+      <InstallCard />
+      <PasswordCard />
+      <Card className="flex items-center justify-between gap-3 p-5">
+        <div className="min-w-0"><p className="font-bold">{user.name}</p><p className="truncate text-sm text-muted">{user.email}</p></div>
+        <Button variant="outline" icon={LogOut} onClick={() => void logout()}>Sair</Button>
+      </Card>
+    </div>
   </div>;
 }
 
@@ -73,7 +75,7 @@ function PasswordCard() {
   const change = useAction(() => api("PUT", "/auth/password", { current, password }), "Senha alterada.");
   return <Card className="p-5">
     <h2 className="mb-4 text-base font-extrabold">Trocar senha</h2>
-    <form className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end" onSubmit={e => { e.preventDefault(); change.mutate(undefined, { onSuccess: () => { setCurrent(""); setPassword(""); } }); }}>
+    <form className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end lg:grid-cols-1" onSubmit={e => { e.preventDefault(); change.mutate(undefined, { onSuccess: () => { setCurrent(""); setPassword(""); } }); }}>
       <Field label="Senha atual">{id => <Input id={id} type="password" value={current} onChange={e => setCurrent(e.target.value)} autoComplete="current-password" required />}</Field>
       <Field label="Nova senha">{id => <Input id={id} type="password" value={password} onChange={e => setPassword(e.target.value)} autoComplete="new-password" minLength={6} required />}</Field>
       <Button type="submit" variant="dark" icon={KeyRound} loading={change.isPending}>Trocar</Button>

@@ -32,6 +32,9 @@ export function ClosingPage({ month, setMonth }: { month: string; setMonth: (m: 
       <div className="hidden sm:block"><Button icon={FileDown} loading={busy} disabled={!done.length} onClick={() => void generate()}>Gerar PDF</Button></div>
     </div>
 
+    {/* Computador: resumo fixo à esquerda, lista à direita. */}
+    <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,26rem)_1fr] xl:grid-cols-[minmax(0,30rem)_1fr] lg:gap-6">
+    <div className="space-y-5 lg:sticky lg:top-24">
     <div className="relative overflow-hidden rounded-3xl bg-night p-6 text-white">
       <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-brand/25 blur-2xl" />
       <p className="text-xs font-bold tracking-wide text-white/60 uppercase">Total a receber · {monthLabel(month)}</p>
@@ -68,6 +71,7 @@ export function ClosingPage({ month, setMonth }: { month: string; setMonth: (m: 
         </tbody>
       </table>
     </Card>
+    </div>
 
     <section>
       <h3 className="mb-2 px-1 text-sm font-extrabold">Serviços concluídos</h3>
@@ -84,6 +88,7 @@ export function ClosingPage({ month, setMonth }: { month: string; setMonth: (m: 
           </div>)}
         </Card>}
     </section>
+    </div>
 
     <div className="h-16 sm:hidden" />
     <div className="above-nav fixed inset-x-0 z-20 px-4 sm:hidden">

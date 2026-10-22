@@ -51,6 +51,9 @@ button:not(:disabled) { cursor: pointer; }
 .safe-x { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
 /* Margem lateral de 16px, maior se o celular estiver deitado com entalhe. */
 .px-safe { padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); }
+/* Tela cheia: margens maiores no tablet e no computador. */
+@media (min-width: 640px) { .px-safe { padding-left: 1.5rem; padding-right: 1.5rem; } }
+@media (min-width: 1024px) { .px-safe { padding-left: 2.5rem; padding-right: 2.5rem; } }
 /* Botões flutuantes logo acima da barra de abas. */
 .above-nav { bottom: calc(4rem + env(safe-area-inset-bottom) + 0.75rem); }
 @media (max-width: 639px) {

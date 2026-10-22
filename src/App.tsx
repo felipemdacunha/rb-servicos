@@ -43,8 +43,8 @@ export function App() {
 
   return <div className="pb-nav min-h-dvh sm:pb-10">
     <header className="safe-top safe-x sticky top-0 z-30 bg-night text-white shadow-lg shadow-black/10">
-      <div className="mx-auto flex h-16 max-w-5xl items-center gap-4 px-4">
-        <Logo className="h-12 w-auto" />
+      <div className="px-safe flex h-16 items-center gap-4 lg:h-[4.5rem]">
+        <Logo className="h-12 w-auto lg:h-14" />
         <div className="leading-tight">
           <p className="text-sm font-extrabold">Ordens de serviço</p>
           <p className="text-xs text-white/60">Rastreadores · Localiza</p>
@@ -61,7 +61,7 @@ export function App() {
       </div>}
     </header>
 
-    <main className="px-safe mx-auto max-w-5xl py-5">
+    <main className="px-safe py-5 lg:py-7">
       {tab === "agenda" && <AgendaPage month={month} setMonth={setMonth} openNew={openNew} />}
       {tab === "fechamento" && <ClosingPage month={month} setMonth={setMonth} />}
       {tab === "ajustes" && <SettingsPage user={session.data.user} />}

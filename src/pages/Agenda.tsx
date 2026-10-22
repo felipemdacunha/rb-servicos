@@ -39,7 +39,7 @@ export function AgendaPage({ month, setMonth, openNew }: { month: string; setMon
       <div className="hidden sm:block"><Button icon={Plus} onClick={() => setEditing("new")}>Nova OS</Button></div>
     </div>
 
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:gap-4">
       <Stat label="A receber" value={formatMoney(summary.total)} strong />
       <Stat label="Concluídas" value={String(summary.count)} />
       <Stat label="Agendadas" value={String(summary.pending)} />
@@ -70,7 +70,7 @@ export function AgendaPage({ month, setMonth, openNew }: { month: string; setMon
             <span className="text-xs font-semibold text-muted">{weekday(date)}</span>
             {date === todayDate && <span className="rounded-md bg-brand px-1.5 py-0.5 text-[10px] font-extrabold text-white uppercase">Hoje</span>}
           </h3>
-          <div className="space-y-2">
+          <div className="grid gap-2 lg:grid-cols-2 lg:gap-3 2xl:grid-cols-3">
             {items.map(o => <OrderCard key={o.id} order={o} onOpen={() => setEditing(o)} onComplete={() => complete.mutate(o)} busy={complete.isPending && complete.variables?.id === o.id} />)}
           </div>
         </section>)}
