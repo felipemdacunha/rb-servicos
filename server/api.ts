@@ -77,8 +77,9 @@ export function createApi(db: Db, options: { secureCookies: boolean }) {
   const api = express.Router();
   api.use(express.json({ limit: "100kb" }));
   // Gravações só com JSON: um formulário de outro site não consegue enviar (proteção contra CSRF).
+  // DELETE não tem corpo e um formulário de outro site não consegue fazer DELETE.
   api.use((req, res, next) => {
-    if (req.method !== "GET" && !req.is("application/json")) return res.status(415).json({ error: "Envie os dados em JSON." });
+    if ((req.method === "POST" || req.method === "PUT") && !req.is("application/json")) return res.status(415).json({ error: "Envie os dados em JSON." });
     next();
   });
 
