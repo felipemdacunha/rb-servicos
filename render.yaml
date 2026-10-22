@@ -1,0 +1,25 @@
+# Publicação no Render (plano gratuito). Passo a passo no README.md.
+# O banco fica no Turso (grátis): o disco do Render é apagado a cada reinício.
+services:
+  - type: web
+    name: rb-servicos
+    runtime: node
+    plan: free
+    region: virginia # mesma região do banco no Turso (AWS us-east-1)
+    branch: main
+    autoDeploy: true
+    buildCommand: npm ci --no-audit --no-fund && npm run build
+    startCommand: node dist/server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: TRUST_PROXY
+        value: "true"
+      # Preenchidos no painel do Render (não ficam no GitHub):
+      - key: TURSO_DATABASE_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false
