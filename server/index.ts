@@ -10,8 +10,25 @@ const isDev = process.argv.includes("--dev");
 const port = Number(process.env.PORT ?? 3000);
 // Nuvem: banco no Turso. Sem TURSO_DATABASE_URL, usa um arquivo local.
 const target: DatabaseTarget = process.env.TURSO_DATABASE_URL
-  ? { url: process.env.TURSO_DATABASE_URL.trim(), authToken: process.env.TURSO_AUTH_TOKEN?.trim() }
+  ? checkedTurso(process.env.TURSO_DATABASE_URL, process.env.TURSO_AUTH_TOKEN)
   : resolve(process.env.DATABASE_PATH ?? "./data/rb-servicos.db");
+
+/** Erros comuns ao configurar a nuvem (URL e token trocados, texto a mais). Nunca mostra os valores. */
+function checkedTurso(rawUrl: string, rawToken: string | undefined) {
+  const url = rawUrl.trim();
+  const token = rawToken?.trim() ?? "";
+  const fail = (message: string): never => {
+    console.error(`Configuração inválida: ${message}`);
+    process.exit(1);
+  };
+  if (url.startsWith("eyJ")) fail("TURSO_DATABASE_URL está com o token. Nesse campo vai a URL do banco (começa com libsql://); o token vai em TURSO_AUTH_TOKEN.");
+  if (!/^(libsql|https):\/\/\S+$/.test(url)) fail("TURSO_DATABASE_URL precisa começar com libsql:// (copie a URL do banco no Turso).");
+  if (!token) fail("TURSO_AUTH_TOKEN está vazio.");
+  if (/\s/.test(token) || token.includes("libsql://") || !token.startsWith("eyJ")) {
+    fail("TURSO_AUTH_TOKEN está errado. Cole só o código do token (começa com eyJ), sem a URL e sem espaços.");
+  }
+  return { url, authToken: token };
+}
 
 const db = await openDatabase(target);
 const app = express();
