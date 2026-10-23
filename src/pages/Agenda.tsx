@@ -1,7 +1,8 @@
-import { Check, Clock, Loader2, MapPin, Plus, Search } from "lucide-react";
+import { Check, Clock, FileSpreadsheet, Loader2, MapPin, Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { formatDate, formatKm, formatMoney, formatPlate, normalizePlate, orderTotal, SERVICE_LABELS, summarize, today, weekday, type Order } from "@shared/domain";
 import { api, useAction, useOrders } from "../api";
+import { ImportSheet } from "../components/ImportSheet";
 import { InstallCard } from "../components/InstallCard";
 import { OrderForm } from "../components/OrderForm";
 import { Button, Card, cx, MonthPicker, ServiceBadge, StatusBadge } from "../components/ui";
@@ -13,6 +14,7 @@ export function AgendaPage({ month, setMonth, openNew }: { month: string; setMon
   const [filter, setFilter] = useState<Filter>("todas");
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<Order | "new" | null>(openNew ? "new" : null);
+  const [importing, setImporting] = useState(false);
   const list = orders.data ?? [];
   const summary = summarize(list);
   const todayDate = today();
@@ -36,7 +38,10 @@ export function AgendaPage({ month, setMonth, openNew }: { month: string; setMon
     <InstallCard compact />
     <div className="flex flex-wrap items-center justify-between gap-3">
       <MonthPicker month={month} onChange={setMonth} />
-      <div className="hidden sm:block"><Button icon={Plus} onClick={() => setEditing("new")}>Nova OS</Button></div>
+      <div className="flex gap-2">
+        <Button variant="outline" icon={FileSpreadsheet} onClick={() => setImporting(true)}><span className="hidden sm:inline">Importar planilha</span><span className="sm:hidden">Importar</span></Button>
+        <div className="hidden sm:block"><Button icon={Plus} onClick={() => setEditing("new")}>Nova OS</Button></div>
+      </div>
     </div>
 
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:gap-4">
@@ -81,6 +86,7 @@ export function AgendaPage({ month, setMonth, openNew }: { month: string; setMon
       <Plus className="h-7 w-7" />
     </button>
 
+    {importing && <ImportSheet onClose={() => setImporting(false)} onImported={m => { if (m) setMonth(m); }} />}
     {editing && <OrderForm initial={editing === "new" ? undefined : editing} defaultDate={month === todayDate.slice(0, 7) ? todayDate : `${month}-01`} onClose={() => setEditing(null)} />}
   </div>;
 }

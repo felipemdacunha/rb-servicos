@@ -14,6 +14,8 @@ export type Db = {
   get<T = Row>(sql: string, ...args: InValue[]): Promise<T | undefined>;
   all<T = Row>(sql: string, ...args: InValue[]): Promise<T[]>;
   run(sql: string, ...args: InValue[]): Promise<{ changes: number; lastInsertRowid: number }>;
+  /** Vários comandos de uma vez, tudo ou nada (importação). */
+  batch(statements: Array<{ sql: string; args: InValue[] }>): Promise<void>;
   kind: "arquivo" | "turso";
   close(): void;
 };
@@ -79,6 +81,9 @@ export async function openDatabase(target: DatabaseTarget): Promise<Db> {
     async run(sql: string, ...args: InValue[]) {
       const result = await client.execute({ sql, args });
       return { changes: result.rowsAffected, lastInsertRowid: Number(result.lastInsertRowid ?? 0) };
+    },
+    async batch(statements) {
+      if (statements.length) await client.batch(statements, "write");
     },
     close: () => client.close(),
   };

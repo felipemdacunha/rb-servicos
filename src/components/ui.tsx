@@ -52,7 +52,7 @@ export function Card({ className, children }: { className?: string; children: Re
 }
 
 /** Folha que sobe de baixo no celular e vira janela central no computador. */
-export function Sheet({ title, onClose, children, footer }: { title: string; onClose: () => void; children: ReactNode; footer?: ReactNode }) {
+export function Sheet({ title, onClose, children, footer, wide }: { title: string; onClose: () => void; children: ReactNode; footer?: ReactNode; wide?: boolean }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", onKey);
@@ -62,7 +62,7 @@ export function Sheet({ title, onClose, children, footer }: { title: string; onC
   }, [onClose]);
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center sm:p-6" onMouseDown={e => e.target === e.currentTarget && onClose()}>
-      <div role="dialog" aria-modal="true" aria-label={title} className="modal-panel flex max-h-[94dvh] w-full max-w-lg flex-col rounded-t-3xl bg-surface shadow-2xl sm:rounded-3xl">
+      <div role="dialog" aria-modal="true" aria-label={title} className={cx("modal-panel flex max-h-[94dvh] w-full flex-col", wide ? "max-w-5xl" : "max-w-lg", "rounded-t-3xl bg-surface shadow-2xl sm:rounded-3xl")}>
         <div className="mx-auto mt-2 h-1.5 w-10 rounded-full bg-line sm:hidden" aria-hidden />
         <div className="flex items-center justify-between border-b border-line px-5 py-3 sm:py-4">
           <h2 className="text-lg font-extrabold">{title}</h2>

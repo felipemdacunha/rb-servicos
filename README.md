@@ -12,6 +12,9 @@ para a **Localiza** e fechar o mês com um PDF para conferir com a nota fiscal.
   (ex.: Rio Grande), o km da última viagem é preenchido sozinho.
 - **Fechamento** — total a receber do mês (só OS concluídas), resumo por serviço + deslocamento e
   **PDF com a logo** (exemplo em `docs/exemplo-fechamento.pdf`).
+- **Importar planilha** — botão na Agenda. Aceita .xlsx ou .csv com outras colunas e abas: o app acha sozinho
+  data, placa, veículo, tipo, km, cidade, valor e nº da OS (dá para ajustar na mão), mostra uma prévia com os
+  problemas de cada linha e não duplica OS que já existem (mesma data, placa e serviço).
 - **Ajustes** — tabela de preços, valor do km, dados da empresa no PDF (CNPJ, telefone, PIX) e troca de senha.
   Mudar um preço não altera OS já cadastradas.
 - Instala como app no celular (Android: "Adicionar à tela inicial"; iPhone: Compartilhar → Tela de Início).

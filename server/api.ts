@@ -75,7 +75,7 @@ type AuthedRequest = Request & { user?: User };
 
 export function createApi(db: Db, options: { secureCookies: boolean }) {
   const api = express.Router();
-  api.use(express.json({ limit: "100kb" }));
+  api.use(express.json({ limit: "3mb" })); // importação de planilha manda até alguns milhares de OS
   // Gravações só com JSON: um formulário de outro site não consegue enviar (proteção contra CSRF).
   // DELETE não tem corpo e um formulário de outro site não consegue fazer DELETE.
   api.use((req, res, next) => {
@@ -190,6 +190,41 @@ export function createApi(db: Db, options: { secureCookies: boolean }) {
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       o.date, o.time, o.vehicle, o.plate, o.serviceType, o.serviceValue, o.km, o.kmRate, o.city, o.reference, o.notes, o.status, now, now);
     res.json(mapOrder((await db.get("SELECT * FROM orders WHERE id = ?", result.lastInsertRowid))!));
+  }));
+
+  /**
+   * Importação de planilha. Pula OS que já existem (mesma data, placa e tipo), inclusive repetidas na própria planilha:
+   * importar o mesmo arquivo duas vezes não duplica nada.
+   */
+  api.post("/orders/import", wrap(async (req, res) => {
+    const list = Array.isArray(req.body.orders) ? req.body.orders as Record<string, unknown>[] : [];
+    if (!list.length) return res.status(400).json({ error: "Nenhuma OS para importar." });
+    if (list.length > 5000) return res.status(400).json({ error: "Planilha grande demais: importe no máximo 5.000 OS por vez." });
+    const orders = list.map((item, i) => {
+      try {
+        return validateOrder(item);
+      } catch (error) {
+        throw new ValidationError(`OS ${i + 1}: ${error instanceof Error ? error.message : "inválida"}`);
+      }
+    });
+    const dates = orders.map(o => o.date).sort();
+    const existing = await db.all<{ date: string; plate: string; serviceType: string }>(
+      "SELECT date, plate, serviceType FROM orders WHERE date BETWEEN ? AND ?", dates[0]!, dates[dates.length - 1]!);
+    const seen = new Set(existing.map(o => `${o.date}|${o.plate}|${o.serviceType}`));
+    const now = Date.now();
+    const statements = [];
+    for (const o of orders) {
+      const key = `${o.date}|${o.plate}|${o.serviceType}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      statements.push({
+        sql: `INSERT INTO orders (date, time, vehicle, plate, serviceType, serviceValue, km, kmRate, city, reference, notes, status, createdAt, updatedAt)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        args: [o.date, o.time, o.vehicle, o.plate, o.serviceType, o.serviceValue, o.km, o.kmRate, o.city, o.reference, o.notes, o.status, now, now],
+      });
+    }
+    await db.batch(statements);
+    res.json({ inserted: statements.length, skipped: orders.length - statements.length });
   }));
 
   api.put("/orders/:id", wrap(async (req, res) => {
